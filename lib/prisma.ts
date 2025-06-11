@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  directPrisma: PrismaClient | undefined
 }
 
 // Build connection URL with required parameters to fix prepared statement issue
@@ -20,10 +21,20 @@ function buildDatabaseUrl() {
   return url.toString()
 }
 
+// Regular prisma client for read operations (with pooling)
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   datasources: {
     db: {
       url: buildDatabaseUrl(),
+    },
+  },
+})
+
+// Direct connection client for write operations (bypasses pgBouncer)
+export const directPrisma = globalForPrisma.directPrisma ?? new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DIRECT_URL || buildDatabaseUrl(),
     },
   },
 })
@@ -55,4 +66,7 @@ export async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3):
   throw lastError
 }
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma
+  globalForPrisma.directPrisma = directPrisma
+}

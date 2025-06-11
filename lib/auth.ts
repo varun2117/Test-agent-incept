@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { prisma, withRetry } from './prisma'
+import { prisma, directPrisma, withRetry } from './prisma'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -60,7 +60,7 @@ export class AuthService {
     const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
     const expiresAt = new Date(Date.now() + SESSION_DURATION)
 
-    await prisma.session.create({
+    await directPrisma.session.create({
       data: {
         userId,
         token,
@@ -160,17 +160,15 @@ export class AuthService {
       // Hash password
       const hashedPassword = await this.hashPassword(data.password)
 
-      // Create user with retry logic
-      const user = await withRetry(() => 
-        prisma.user.create({
-          data: {
-            username: data.username,
-            email: data.email,
-            password: hashedPassword,
-            name: data.name
-          }
-        })
-      )
+      // Create user using direct connection (bypasses pooling)
+      const user = await directPrisma.user.create({
+        data: {
+          username: data.username,
+          email: data.email,
+          password: hashedPassword,
+          name: data.name
+        }
+      })
 
       return {
         success: true,
