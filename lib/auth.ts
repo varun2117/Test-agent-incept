@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { prisma } from './prisma'
+import { prisma, withRetry } from './prisma'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -136,15 +136,17 @@ export class AuthService {
     name?: string
   }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
     try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { username: data.username },
-            { email: data.email }
-          ]
-        }
-      })
+      // Check if user already exists with retry logic
+      const existingUser = await withRetry(() => 
+        prisma.user.findFirst({
+          where: {
+            OR: [
+              { username: data.username },
+              { email: data.email }
+            ]
+          }
+        })
+      )
 
       if (existingUser) {
         return {
@@ -158,15 +160,17 @@ export class AuthService {
       // Hash password
       const hashedPassword = await this.hashPassword(data.password)
 
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          username: data.username,
-          email: data.email,
-          password: hashedPassword,
-          name: data.name
-        }
-      })
+      // Create user with retry logic
+      const user = await withRetry(() => 
+        prisma.user.create({
+          data: {
+            username: data.username,
+            email: data.email,
+            password: hashedPassword,
+            name: data.name
+          }
+        })
+      )
 
       return {
         success: true,
