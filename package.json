@@ -4,12 +4,15 @@
   "description": "Collection of test chat agents for red team testing",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "setup": "npx prisma generate && npx prisma db push",
     "db:reset": "npx prisma db push --force-reset",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
