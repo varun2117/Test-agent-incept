@@ -153,7 +153,7 @@ export async function POST(
       messages,
       model,
       temperature: 0.7,
-      maxTokens: 400,
+      maxTokens: 2000,
       apiKey,
     });
 
