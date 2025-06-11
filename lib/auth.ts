@@ -178,9 +178,10 @@ export class AuthService {
         }
       }
     } catch (error) {
+      console.error('AuthService.register error:', error)
       return {
         success: false,
-        error: 'Registration failed'
+        error: error instanceof Error ? error.message : 'Registration failed'
       }
     }
   }
@@ -236,9 +237,10 @@ export class AuthService {
         token
       }
     } catch (error) {
+      console.error('AuthService.login error:', error)
       return {
         success: false,
-        error: 'Login failed'
+        error: error instanceof Error ? error.message : 'Login failed'
       }
     }
   }

@@ -80,7 +80,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Signup error:', error)
     return NextResponse.json(
-      { success: false, error: 'Registration failed' },
+      { 
+        success: false, 
+        error: 'Registration failed',
+        debug: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
