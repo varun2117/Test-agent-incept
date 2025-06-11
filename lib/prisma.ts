@@ -34,7 +34,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
 export const directPrisma = globalForPrisma.directPrisma ?? new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DIRECT_URL || buildDatabaseUrl(),
+      url: process.env.DIRECT_URL || process.env.POSTGRES_URL_NON_POOLING || buildDatabaseUrl(),
     },
   },
 })
