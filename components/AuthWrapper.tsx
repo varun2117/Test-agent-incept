@@ -13,7 +13,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const publicRoutes = ['/login', '/signup']
+  const publicRoutes = ['/login', '/signup', '/debug-auth']
   const isPublicRoute = publicRoutes.includes(pathname)
 
   useEffect(() => {
