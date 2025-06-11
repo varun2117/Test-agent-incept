@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllAgents } from '@/lib/agents';
 import { AuthService } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { directPrisma } from '@/lib/prisma';
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Get custom agents (public ones + user's private ones)
     let customAgents = [];
     if (currentUser) {
-      const dbAgents = await prisma.agent.findMany({
+      const dbAgents = await directPrisma.agent.findMany({
         where: {
           isActive: true,
           OR: [
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       }));
     } else {
       // If not authenticated, only show public custom agents
-      const dbAgents = await prisma.agent.findMany({
+      const dbAgents = await directPrisma.agent.findMany({
         where: {
           isActive: true,
           isPublic: true
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create agent
-    const agent = await prisma.agent.create({
+    const agent = await directPrisma.agent.create({
       data: {
         userId: currentUser.id,
         name: name.trim(),
@@ -264,7 +264,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if agent exists and belongs to user
-    const agent = await prisma.agent.findUnique({
+    const agent = await directPrisma.agent.findUnique({
       where: { id: agentId }
     });
 
@@ -283,7 +283,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete agent
-    await prisma.agent.delete({
+    await directPrisma.agent.delete({
       where: { id: agentId }
     });
 

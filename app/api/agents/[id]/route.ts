@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgentById } from '@/lib/agents';
 import { openai } from '@/lib/openai';
-import { prisma } from '@/lib/prisma';
+import { directPrisma } from '@/lib/prisma';
 
 // CORS headers
 const corsHeaders = {
@@ -75,7 +75,7 @@ export async function POST(
         userId = 'default-user';
       }
       
-      const storedApiKey = await prisma.apiKey.findFirst({
+      const storedApiKey = await directPrisma.apiKey.findFirst({
         where: {
           userId: userId,
           provider: provider,
@@ -110,7 +110,7 @@ export async function POST(
     
     if (!agent) {
       // Try to find custom agent in database
-      const customAgent = await prisma.agent.findUnique({
+      const customAgent = await directPrisma.agent.findUnique({
         where: { 
           id: params.id,
           isActive: true 
@@ -197,7 +197,7 @@ export async function GET(
     
     if (!agent) {
       // Try to find custom agent in database
-      const customAgent = await prisma.agent.findUnique({
+      const customAgent = await directPrisma.agent.findUnique({
         where: { 
           id: params.id,
           isActive: true 

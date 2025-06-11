@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { directPrisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     // For demo, we'll use a default user. In production, get from session/auth
     const defaultUserId = 'default-user'
     
-    const apiKeys = await prisma.apiKey.findMany({
+    const apiKeys = await directPrisma.apiKey.findMany({
       where: { 
         userId: defaultUserId,
         isActive: true 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const defaultUserId = 'default-user'
 
     // Create user if doesn't exist
-    await prisma.user.upsert({
+    await directPrisma.user.upsert({
       where: { username: 'default' },
       update: {},
       create: {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Upsert API key (update if exists, create if not)
-    const apiKey = await prisma.apiKey.upsert({
+    const apiKey = await directPrisma.apiKey.upsert({
       where: {
         userId_provider: {
           userId: defaultUserId,
@@ -113,7 +113,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await prisma.apiKey.update({
+    await directPrisma.apiKey.update({
       where: { id: keyId },
       data: { isActive: false }
     })
