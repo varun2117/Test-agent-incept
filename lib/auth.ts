@@ -76,7 +76,7 @@ export class AuthService {
    */
   static async getUserFromSession(token: string): Promise<AuthUser | null> {
     try {
-      const session = await prisma.session.findUnique({
+      const session = await directPrisma.session.findUnique({
         where: { token },
         include: { user: true }
       })
@@ -84,7 +84,7 @@ export class AuthService {
       if (!session || session.expiresAt < new Date()) {
         // Clean up expired session
         if (session) {
-          await prisma.session.delete({ where: { id: session.id } })
+          await directPrisma.session.delete({ where: { id: session.id } })
         }
         return null
       }
@@ -105,7 +105,7 @@ export class AuthService {
    */
   static async deleteSession(token: string): Promise<void> {
     try {
-      await prisma.session.delete({
+      await directPrisma.session.delete({
         where: { token }
       })
     } catch (error) {
@@ -117,7 +117,7 @@ export class AuthService {
    * Clean up expired sessions
    */
   static async cleanupExpiredSessions(): Promise<void> {
-    await prisma.session.deleteMany({
+    await directPrisma.session.deleteMany({
       where: {
         expiresAt: {
           lt: new Date()
@@ -136,17 +136,15 @@ export class AuthService {
     name?: string
   }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
     try {
-      // Check if user already exists with retry logic
-      const existingUser = await withRetry(() => 
-        prisma.user.findFirst({
-          where: {
-            OR: [
-              { username: data.username },
-              { email: data.email }
-            ]
-          }
-        })
-      )
+      // Check if user already exists using direct connection
+      const existingUser = await directPrisma.user.findFirst({
+        where: {
+          OR: [
+            { username: data.username },
+            { email: data.email }
+          ]
+        }
+      })
 
       if (existingUser) {
         return {
@@ -198,8 +196,8 @@ export class AuthService {
     error?: string
   }> {
     try {
-      // Find user by username or email
-      const user = await prisma.user.findFirst({
+      // Find user by username or email using direct connection
+      const user = await directPrisma.user.findFirst({
         where: {
           OR: [
             { username: usernameOrEmail },
