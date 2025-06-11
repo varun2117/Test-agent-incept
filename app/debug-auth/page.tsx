@@ -59,6 +59,11 @@ export default function DebugAuthPage() {
   }
 
   const testLogin = async () => {
+    const username = prompt('Enter username/email:')
+    const password = prompt('Enter password:')
+    
+    if (!username || !password) return
+    
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -66,8 +71,8 @@ export default function DebugAuthPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          usernameOrEmail: 'test', // Replace with actual credentials
-          password: 'test123'      // Replace with actual credentials
+          usernameOrEmail: username,
+          password: password
         }),
       })
       
