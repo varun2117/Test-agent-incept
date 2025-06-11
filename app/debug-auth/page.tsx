@@ -58,6 +58,36 @@ export default function DebugAuthPage() {
     }
   }
 
+  const testLogin = async () => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          usernameOrEmail: 'test', // Replace with actual credentials
+          password: 'test123'      // Replace with actual credentials
+        }),
+      })
+      
+      const data = await response.json()
+      console.log('Login API response:', { 
+        status: response.status, 
+        data,
+        hasToken: !!data.token,
+        tokenPreview: data.token ? `${data.token.substring(0, 20)}...` : null
+      })
+      
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token)
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Login API error:', error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
@@ -83,9 +113,16 @@ export default function DebugAuthPage() {
 
           <button
             onClick={testAgentsEndpoint}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-4"
           >
             Test Agents API
+          </button>
+
+          <button
+            onClick={testLogin}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Test Login API
           </button>
 
           <div>
